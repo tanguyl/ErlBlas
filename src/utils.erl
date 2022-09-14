@@ -161,11 +161,14 @@ element_wise_op_conc2(Op, M1, M2) ->
 
 element_wise_op_conc(Op, M1, M2) ->
     ParentPID = self(),
+
     PidMat =
         lists:zipwith(
             fun(L1, L2) ->
                 spawn(fun() ->
+                    Start_sched =  erlang:system_info(scheduler_id),
                     Result = lists:zipwith(fun(E1, E2) -> Op(E1, E2) end, L1, L2),
+                    io:format("Processus ~w starts on scheduler ~w, ends on ~w ~n", [self(), Start_sched, erlang:system_info(scheduler_id)]),
                     ParentPID ! {Result, self()}
                 end)
             end,
